@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Upload, Cpu, Map, Layers, CheckCircle2, Circle, Loader2,
-  Image, FileCheck, AlertCircle, BarChart3, RefreshCw, Play
+  Image, FileCheck, BarChart3, Play, ArrowRight, Check
 } from 'lucide-react';
 import Sidebar from '../layouts/Sidebar';
-import { uploadAPI, analysisAPI, Features } from '../services/api';
+import { uploadAPI, analysisAPI, AnalysisResponse } from '../services/api';
 
 interface PipelineStage {
   name: string;
@@ -12,21 +13,21 @@ interface PipelineStage {
   icon: any;
 }
 
-const PIPELINE_STAGES: PipelineStage[] = [
-  { name: 'Image uploaded', status: 'completed', icon: Upload },
-  { name: 'Image validated', status: 'completed', icon: FileCheck },
-  { name: 'Preprocessing completed', status: 'completed', icon: Image },
-  { name: 'AI analysis running', status: 'pending', icon: Cpu },
-  { name: 'Parcel extraction', status: 'pending', icon: Map },
-  { name: 'GIS generation', status: 'pending', icon: Layers },
+const INITIAL_STAGES: PipelineStage[] = [
+  { name: 'Image uploaded & validated', status: 'pending', icon: Upload },
+  { name: 'Preprocessing & Geo-referencing', status: 'pending', icon: Image },
+  { name: 'YOLOv8 Urban Structure Detection', status: 'pending', icon: Cpu },
+  { name: 'U-Net Semantic Parcel Segmentation', status: 'pending', icon: Map },
+  { name: 'Parcel Boundary & Topology Engine', status: 'pending', icon: Layers },
+  { name: 'Cadastral GIS Dataset Generation', status: 'pending', icon: FileCheck },
 ];
 
 export default function AnalysisPage() {
   const [file, setFile] = useState<File | null>(null);
-  const [pipelineStages, setPipelineStages] = useState<PipelineStage[]>(PIPELINE_STAGES);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [pipelineStages, setPipelineStages] = useState<PipelineStage[]>(INITIAL_STAGES);
   const [analyzing, setAnalyzing] = useState(false);
-  const [result, setResult] = useState<any>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [result, setResult] = useState<AnalysisResponse | null>(null);
   const [dragActive, setDragActive] = useState(false);
 
   const handleDrag = (e: React.DragEvent) => {
@@ -36,59 +37,63 @@ export default function AnalysisPage() {
     else if (e.type === 'dragleave') setDragActive(false);
   };
 
+  const handleFile = (selected: File) => {
+    setFile(selected);
+    if (selected.type.startsWith('image/')) {
+      setPreviewUrl(URL.createObjectURL(selected));
+    } else {
+      setPreviewUrl(null);
+    }
+    const reset = INITIAL_STAGES.map((s, i) =>
+      i === 0 ? { ...s, status: 'completed' as const } : { ...s, status: 'pending' as const }
+    );
+    setPipelineStages(reset);
+  };
+
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
+      handleFile(e.dataTransfer.files[0]);
     }
   };
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
+      handleFile(e.target.files[0]);
     }
   };
 
-  const startAnalysis = async () => {
+  const executePipeline = async () => {
     setAnalyzing(true);
     setResult(null);
 
-    const stages = [...PIPELINE_STAGES];
+    const stages = INITIAL_STAGES.map(s => ({ ...s }));
     for (let i = 0; i < stages.length; i++) {
       stages[i] = { ...stages[i], status: 'processing' };
       setPipelineStages([...stages]);
-      await new Promise(r => setTimeout(r, 500 + Math.random() * 800));
+      await new Promise(r => setTimeout(r, 450 + Math.random() * 400));
       stages[i] = { ...stages[i], status: 'completed' };
       setPipelineStages([...stages]);
     }
 
     try {
+      if (file) {
+        await uploadAPI.upload(file);
+      }
       const res = await analysisAPI.analyze();
       setResult(res.data);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
     setAnalyzing(false);
   };
 
   const runDemo = async () => {
-    setAnalyzing(true);
-    setResult(null);
-
-    const stages = [...PIPELINE_STAGES];
-    for (let i = 0; i < stages.length; i++) {
-      stages[i] = { ...stages[i], status: 'processing' };
-      setPipelineStages([...stages]);
-      await new Promise(r => setTimeout(r, 300 + Math.random() * 500));
-      stages[i] = { ...stages[i], status: 'completed' };
-      setPipelineStages([...stages]);
-    }
-
-    try {
-      const res = await analysisAPI.analyze();
-      setResult(res.data);
-    } catch (err) { console.error(err); }
-    setAnalyzing(false);
+    setFile(new File(['dummy drone tiff'], 'new_delhi_orthophoto_survey_01.tif', { type: 'image/tiff' }));
+    setPreviewUrl(null);
+    await executePipeline();
   };
 
   return (
@@ -123,7 +128,15 @@ export default function AnalysisPage() {
                 onChange={handleFileSelect}
                 className="hidden"
               />
-              {file ? (
+              {previewUrl ? (
+                <div className="space-y-2">
+                  <div className="relative rounded-lg overflow-hidden border border-navy-700/50 max-h-40 mx-auto">
+                    <img src={previewUrl} alt="Drone imagery preview" className="w-full h-36 object-cover" />
+                  </div>
+                  <p className="font-medium text-xs truncate max-w-xs mx-auto">{file?.name}</p>
+                  <p className="text-xs text-navy-400">{file ? (file.size / 1024 / 1024).toFixed(2) : 0} MB &bull; <span className="text-success-400">Ready</span></p>
+                </div>
+              ) : file ? (
                 <div className="space-y-2">
                   <FileCheck className="w-12 h-12 text-success-500 mx-auto" />
                   <p className="font-medium">{file.name}</p>
@@ -144,7 +157,7 @@ export default function AnalysisPage() {
 
             <div className="mt-4 flex gap-3">
               <button
-                onClick={startAnalysis}
+                onClick={executePipeline}
                 disabled={!file || analyzing}
                 className="flex-1 flex items-center justify-center gap-2 py-3 rounded-lg bg-accent-600 hover:bg-accent-500 disabled:bg-navy-700 disabled:text-navy-400 text-white font-medium transition-all"
               >
@@ -178,12 +191,12 @@ export default function AnalysisPage() {
                   ) : (
                     <Circle className="w-5 h-5 text-navy-600 flex-shrink-0" />
                   )}
-                  <span className={`text-sm ${stage.status === 'completed' ? 'text-white' : stage.status === 'processing' ? 'text-accent-300' : 'text-navy-500'}`}>
+                  <span className={`text-sm ${stage.status === 'completed' ? 'text-white' : stage.status === 'processing' ? 'text-accent-300 font-medium' : 'text-navy-500'}`}>
                     {stage.name}
                   </span>
                   {stage.status === 'processing' && (
-                    <div className="flex-1 h-1 bg-navy-700 rounded-full overflow-hidden ml-2">
-                      <div className="h-full bg-accent-500 rounded-full animate-pulse" style={{ width: '60%' }} />
+                    <div className="flex-1 h-1.5 bg-navy-800 rounded-full overflow-hidden ml-2">
+                      <div className="h-full bg-accent-500 rounded-full animate-pulse" style={{ width: '70%' }} />
                     </div>
                   )}
                 </div>
@@ -211,10 +224,19 @@ export default function AnalysisPage() {
                   </div>
                   <div className="bg-navy-800/50 rounded-lg p-3">
                     <p className="text-xs text-navy-400">Avg Confidence</p>
-                    <p className="text-xl font-bold">{(result.features_summary.average_confidence * 100).toFixed(1)}%</p>
+                    <p className="text-xl font-bold text-emerald-400">{(result.features_summary.average_confidence * 100).toFixed(1)}%</p>
                   </div>
                 </div>
-                <p className="text-xs text-navy-400 mt-3">Processing time: {result.processing_time}s</p>
+                <div className="mt-4 flex items-center justify-between">
+                  <p className="text-xs text-navy-400">Processing time: {result.processing_time}s</p>
+                  <Link
+                    to="/map"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-accent-600 hover:bg-accent-500 text-white text-xs font-semibold shadow-lg shadow-accent-600/20 transition-all"
+                  >
+                    View on GIS Map
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
             )}
           </div>
