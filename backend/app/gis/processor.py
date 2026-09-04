@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from app.models.models import Coordinate, GeoJsonFeature, GeoJsonCollection, GeoJsonPolygon
+from app.models.models import Coordinate, GeoJsonFeature, GeoJsonCollection, GeoJsonPolygon, GeoJsonLineString
 import json
 
 
@@ -43,9 +43,9 @@ def building_to_geojson(building) -> GeoJsonFeature:
 
 
 def road_to_geojson(road) -> GeoJsonFeature:
-    ring = [[c.lng, c.lat] for c in road.coordinates]
-    geometry = GeoJsonPolygon(coordinates=[ring])
+    line = GeoJsonLineString(coordinates=[[c.lng, c.lat] for c in road.coordinates])
     return GeoJsonFeature(
+        type="Feature",
         properties={
             "road_id": road.id,
             "name": road.name,
@@ -53,7 +53,7 @@ def road_to_geojson(road) -> GeoJsonFeature:
             "width": road.width,
             "confidence": road.confidence,
         },
-        geometry=geometry
+        geometry=line
     )
 
 
@@ -97,7 +97,7 @@ def features_to_csv(features) -> str:
         lines.append(f"building,{b.id},{b.area},,{b.parcel_id},{b.confidence},{b.centroid.lat},{b.centroid.lng}")
 
     for r in features.roads:
-        lines.append(f"road,{r.id},{r.length},{r.width},{r.name},{r.confidence},,")
+        lines.append(f"road,{r.id},{r.length},,{r.name},{r.confidence},,")
 
     for v in features.vegetation:
         lines.append(f"vegetation,{v.id},{v.area},,{v.vegetation_type},,{v.centroid.lat},{v.centroid.lng}")
@@ -133,6 +133,28 @@ def features_to_kml(features) -> str:
         kml_parts.append('<Polygon>')
         kml_parts.append('<outerBoundaryIs><LinearRing><coordinates>')
         for c in b.coordinates:
+            kml_parts.append(f'{c.lng},{c.lat},0')
+        kml_parts.append('</coordinates></LinearRing></outerBoundaryIs>')
+        kml_parts.append('</Polygon>')
+        kml_parts.append('</Placemark>')
+
+    for r in features.roads:
+        kml_parts.append('<Placemark>')
+        kml_parts.append(f'<name>{r.name}</name>')
+        kml_parts.append(f'<description>Length: {r.length}m | Width: {r.width}m | Confidence: {r.confidence}</description>')
+        kml_parts.append('<LineString><coordinates>')
+        for c in r.coordinates:
+            kml_parts.append(f'{c.lng},{c.lat},0')
+        kml_parts.append('</coordinates></LineString>')
+        kml_parts.append('</Placemark>')
+
+    for v in features.vegetation:
+        kml_parts.append('<Placemark>')
+        kml_parts.append(f'<name>Vegetation {v.id}</name>')
+        kml_parts.append(f'<description>Area: {v.area}m² | Type: {v.vegetation_type}</description>')
+        kml_parts.append('<Polygon>')
+        kml_parts.append('<outerBoundaryIs><LinearRing><coordinates>')
+        for c in v.coordinates:
             kml_parts.append(f'{c.lng},{c.lat},0')
         kml_parts.append('</coordinates></LinearRing></outerBoundaryIs>')
         kml_parts.append('</Polygon>')

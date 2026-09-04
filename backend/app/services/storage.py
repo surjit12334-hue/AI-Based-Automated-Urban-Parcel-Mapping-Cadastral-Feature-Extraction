@@ -134,7 +134,7 @@ class StorageService:
             "sections": [
                 {"name": "Executive Summary", "included": True},
                 {"name": "Parcel Statistics", "included": config.include_parcels},
-                {"name": "Building Analysis", "included": config.include_parcels},
+                {"name": "Building Analysis", "included": config.include_buildings},
                 {"name": "Map Preview", "included": config.include_map},
                 {"name": "AI Confidence Analysis", "included": config.include_statistics},
             ]

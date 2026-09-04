@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, HTTPException, UploadFile, File, Query
 from typing import Optional
 from app.models.models import ProjectCreate, ReportConfig, ExportConfig, UploadResponse
 from app.services.storage import storage
@@ -51,13 +51,14 @@ async def upload_image(file: UploadFile = File(...)):
 
 
 @router.post("/analyze")
-async def analyze_image(project_id: Optional[str] = None):
+async def analyze_image(project_id: Optional[str] = Query(None), file: UploadFile = File(None)):
     pid = project_id or "demo-project-001"
     project = storage.get_project(pid)
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")
 
-    result = ai_pipeline.process_image("demo_image.tif")
+    filename = file.filename if file and file.filename else "demo_image.tif"
+    result = ai_pipeline.process_image(filename)
 
     from app.ai.demo_data import DEMO_ANALYSIS
     storage.save_analysis(DEMO_ANALYSIS)

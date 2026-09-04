@@ -364,7 +364,7 @@ const mockAPI = {
     },
   },
   reportAPI: {
-    generate: (config: { project_id: string }) =>
+    generate: (config: { project_id: string; include_map?: boolean; include_statistics?: boolean; include_parcels?: boolean; include_buildings?: boolean }) =>
       new Promise((resolve) =>
         setTimeout(() => {
           resolve({
@@ -384,10 +384,10 @@ const mockAPI = {
               },
               sections: [
                 { name: 'Executive Summary', included: true },
-                { name: 'Parcel Statistics', included: true },
-                { name: 'Building Analysis', included: true },
-                { name: 'Map Preview', included: config.project_id ? true : false },
-                { name: 'AI Confidence Analysis', included: true },
+                { name: 'Parcel Statistics', included: config.include_parcels !== false },
+                { name: 'Building Analysis', included: config.include_buildings !== false },
+                { name: 'Map Preview', included: config.include_map !== false },
+                { name: 'AI Confidence Analysis', included: config.include_statistics !== false },
               ],
             },
           });
@@ -490,7 +490,7 @@ export const exportAPI = {
 };
 
 export const reportAPI = {
-  generate: (config: { project_id: string; include_map?: boolean; include_statistics?: boolean; include_parcels?: boolean }): Promise<{ data: GeneratedReport }> =>
+  generate: (config: { project_id: string; include_map?: boolean; include_statistics?: boolean; include_parcels?: boolean; include_buildings?: boolean }): Promise<{ data: GeneratedReport }> =>
     (USE_MOCK ? (mockAPI.reportAPI.generate(config) as Promise<{ data: GeneratedReport }>) : api.post<GeneratedReport>('/reports', config)),
 };
 

@@ -33,10 +33,15 @@ class GeoJsonPolygon(BaseModel):
     coordinates: List[List[List[float]]]
 
 
+class GeoJsonLineString(BaseModel):
+    type: str = "LineString"
+    coordinates: List[List[float]]
+
+
 class GeoJsonFeature(BaseModel):
     type: str = "Feature"
     properties: dict
-    geometry: GeoJsonPolygon
+    geometry: object
 
 
 class GeoJsonCollection(BaseModel):
@@ -132,6 +137,7 @@ class ReportConfig(BaseModel):
     include_map: bool = True
     include_statistics: bool = True
     include_parcels: bool = True
+    include_buildings: bool = True
     format: str = "pdf"
 
 

@@ -14,6 +14,7 @@ export default function ReportsPage() {
     include_map: true,
     include_statistics: true,
     include_parcels: true,
+    include_buildings: true,
   });
 
   useEffect(() => {
@@ -60,24 +61,25 @@ export default function ReportsPage() {
                 <div className="bg-navy-800/50 rounded-lg p-4">
                   <label className="text-sm font-medium mb-3 block">Report Sections</label>
                   <div className="space-y-3">
-                    {([
-                      { key: 'include_map', label: 'Map Preview', desc: 'Interactive map snapshot of detected features' },
-                      { key: 'include_statistics', label: 'Statistics & Analytics', desc: 'AI confidence, land use, and coverage analysis' },
-                      { key: 'include_parcels', label: 'Parcel Details', desc: 'Individual parcel information and building data' },
-                    ] as const).map(({ key, label, desc }) => (
-                      <label key={key} className="flex items-start gap-3 cursor-pointer group">
-                        <input
-                          type="checkbox"
-                          checked={options[key]}
-                          onChange={e => setOptions(prev => ({ ...prev, [key]: e.target.checked }))}
-                          className="mt-1 rounded border-navy-600 bg-navy-800 text-accent-500 focus:ring-accent-500"
-                        />
-                        <div>
-                          <p className="text-sm font-medium group-hover:text-accent-300 transition-colors">{label}</p>
-                          <p className="text-xs text-navy-400">{desc}</p>
-                        </div>
-                      </label>
-                    ))}
+{([
+                       { key: 'include_map', label: 'Map Preview', desc: 'Interactive map snapshot of detected features' },
+                       { key: 'include_statistics', label: 'Statistics & Analytics', desc: 'AI confidence, land use, and coverage analysis' },
+                       { key: 'include_parcels', label: 'Parcel Details', desc: 'Individual parcel information and building data' },
+                       { key: 'include_buildings', label: 'Building Analysis', desc: 'Detailed building data and floor information' },
+                     ] as const).map(({ key, label, desc }) => (
+                       <label key={key} className="flex items-start gap-3 cursor-pointer group">
+                         <input
+                           type="checkbox"
+                           checked={options[key]}
+                           onChange={e => setOptions(prev => ({ ...prev, [key]: e.target.checked }))}
+                           className="mt-1 rounded border-navy-600 bg-navy-800 text-accent-500 focus:ring-accent-500"
+                         />
+                         <div>
+                           <p className="text-sm font-medium group-hover:text-accent-300 transition-colors">{label}</p>
+                           <p className="text-xs text-navy-400">{desc}</p>
+                         </div>
+                       </label>
+                     ))}
                   </div>
                 </div>
 
