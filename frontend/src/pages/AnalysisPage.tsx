@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import Sidebar from '../layouts/Sidebar';
 import { uploadAPI, analysisAPI, AnalysisResponse } from '../services/api';
+import { toast } from '../hooks/useToast';
 
 interface PipelineStage {
   name: string;
@@ -68,6 +69,7 @@ export default function AnalysisPage() {
   const executePipeline = async () => {
     setAnalyzing(true);
     setResult(null);
+    toast.info('Starting AI analysis pipeline...');
 
     const stages = INITIAL_STAGES.map(s => ({ ...s }));
     for (let i = 0; i < stages.length; i++) {
@@ -84,8 +86,10 @@ export default function AnalysisPage() {
       }
       const res = await analysisAPI.analyze();
       setResult(res.data);
+      toast.success('Analysis completed successfully!');
     } catch (err) {
       console.error(err);
+      toast.error('Analysis failed. Please try again.');
     }
     setAnalyzing(false);
   };

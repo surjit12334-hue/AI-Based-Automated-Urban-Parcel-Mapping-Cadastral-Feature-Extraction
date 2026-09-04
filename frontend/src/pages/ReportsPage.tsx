@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import Sidebar from '../layouts/Sidebar';
 import { reportAPI, featureAPI, Statistics } from '../services/api';
+import { toast } from '../hooks/useToast';
 
 export default function ReportsPage() {
   const [stats, setStats] = useState<Statistics | null>(null);
@@ -30,6 +31,7 @@ export default function ReportsPage() {
 
   const generateReport = async () => {
     setGenerating(true);
+    toast.info('Generating report...');
     await new Promise(r => setTimeout(r, 1500));
     try {
       const res = await reportAPI.generate({
@@ -37,7 +39,11 @@ export default function ReportsPage() {
         ...options,
       });
       setReport(res.data);
-    } catch (err) { console.error(err); }
+      toast.success('Report generated successfully!');
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to generate report. Please try again.');
+    }
     setGenerating(false);
   };
 
@@ -98,7 +104,7 @@ export default function ReportsPage() {
             </div>
 
             {report && (
-              <div className="glass rounded-xl p-6 animate-fade-in">
+              <div className="glass-card rounded-xl p-6 animate-fade-in">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold flex items-center gap-2">
                     <CheckCircle2 className="w-5 h-5 text-success-500" />

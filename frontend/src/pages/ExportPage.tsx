@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import Sidebar from '../layouts/Sidebar';
 import { exportAPI } from '../services/api';
+import { toast } from '../hooks/useToast';
 
 type ExportFormat = 'geojson' | 'csv' | 'kml';
 
@@ -31,13 +32,18 @@ export default function ExportPage() {
         case 'kml': res = await exportAPI.kml(); break;
       }
       setExportData(res?.data.data || '');
-    } catch (err) { console.error(err); }
+      toast.success(`Exported ${selectedFormat.toUpperCase()} data successfully`);
+    } catch (err) {
+      console.error(err);
+      toast.error('Failed to export data. Please try again.');
+    }
     setLoading(false);
   };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(exportData);
     setCopied(true);
+    toast.success('Copied to clipboard');
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -51,6 +57,7 @@ export default function ExportPage() {
     a.download = `cadastral-export.${extensions[selectedFormat]}`;
     a.click();
     URL.revokeObjectURL(url);
+    toast.success(`Downloaded ${selectedFormat.toUpperCase()} file`);
   };
 
   return (
@@ -96,7 +103,7 @@ export default function ExportPage() {
           </div>
 
           <div className="lg:col-span-2">
-            <div className="glass rounded-xl h-full flex flex-col">
+            <div className="glass-card rounded-xl h-full flex flex-col animate-in">
               <div className="flex items-center justify-between p-4 border-b border-navy-700/30">
                 <div className="flex items-center gap-2">
                   <h3 className="font-semibold text-sm">Export Preview</h3>

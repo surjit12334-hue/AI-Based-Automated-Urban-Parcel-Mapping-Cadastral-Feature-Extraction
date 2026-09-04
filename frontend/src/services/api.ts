@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API_BASE = '/api';
-const USE_MOCK = true;
+const USE_MOCK = (import.meta as any).env?.VITE_USE_MOCK !== 'false';
 
 export interface Coordinate {
   lat: number;
@@ -504,3 +504,13 @@ export const uploadAPI = {
 };
 
 export default api;
+
+export function withErrorHandling<T>(promise: Promise<T>, fallback: T): Promise<T> {
+  return promise.catch(() => fallback);
+}
+
+export function formatApiError(err: any): string {
+  if (err.response?.data?.detail) return err.response.data.detail;
+  if (err.message) return err.message;
+  return 'An unexpected error occurred';
+}
