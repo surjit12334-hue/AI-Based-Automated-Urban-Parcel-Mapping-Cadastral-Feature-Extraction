@@ -89,7 +89,7 @@ def generate_parcels(center_lat: float, center_lng: float, count: int = 12) -> L
         area = calculate_area(coords)
         perimeter = calculate_perimeter(coords)
         land_use = random.choice(LAND_USE_TYPES)
-        buildings_count = random.randint(0, 3) if land_use in [LandUseType.RESIDENTIAL, LandUseType.COMMERCIAL] else 0
+        buildings_count = random.randint(1, 4) if land_use in [LandUseType.RESIDENTIAL, LandUseType.COMMERCIAL] else random.randint(0, 1)
         building_coverage = random.uniform(10, 60) if buildings_count > 0 else 0.0
         confidence = random.uniform(0.82, 0.99)
 
