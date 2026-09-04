@@ -26,14 +26,22 @@ function AnimatedCounter({ end, duration = 2000, suffix = '' }: { end: number; d
 
 export default function LandingPage() {
   const [isVisible, setIsVisible] = useState(false);
+  const [scrollY, setScrollY] = useState(0);
 
   useEffect(() => {
     setIsVisible(true);
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const heroOpacity = Math.max(0, 1 - scrollY / 800);
+  const heroTranslate = scrollY * 0.3;
+
   return (
-    <div className="min-h-screen bg-navy-950 overflow-hidden">
-      <nav className="fixed top-0 left-0 right-0 z-50 glass">
+    <div className="min-h-screen bg-navy-950 overflow-hidden bg-gradient-mesh bg-grid">
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrollY > 50 ? 'glass shadow-lg shadow-navy-900/50' : 'bg-navy-950/80 backdrop-blur-md'}`}>
+        <div className="nav-gradient-line"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-2">
@@ -69,27 +77,27 @@ export default function LandingPage() {
         </div>
 
         <div className="max-w-7xl mx-auto relative">
-          <div className={`text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-600/10 border border-accent-500/20 mb-8">
+          <div className={`text-center transition-all duration-1000 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`} style={{ opacity: heroOpacity, transform: `translateY(${heroTranslate}px)` }}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-600/10 border border-accent-500/20 mb-8 animate-scale-in">
               <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse" />
               <span className="text-sm text-accent-300">AI-Powered Cadastral Intelligence Platform</span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-tight mb-6">
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-tight mb-6 animate-fade-in">
               Transform Drone Imagery into
               <br />
               <span className="gradient-text">Intelligent Urban Maps</span>
             </h1>
 
-            <p className="text-lg sm:text-xl text-navy-300 max-w-3xl mx-auto mb-10 leading-relaxed">
+            <p className="text-lg sm:text-xl text-navy-300 max-w-3xl mx-auto mb-10 leading-relaxed animate-fade-in delay-200">
               AI-powered cadastral mapping that automatically detects parcels, buildings, roads
               and urban features from high-resolution drone imagery.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in delay-300">
               <Link
                 to="/map"
-                className="group flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-accent-600 to-accent-500 hover:from-accent-500 hover:to-accent-400 text-white font-semibold text-lg transition-all hover:shadow-xl hover:shadow-accent-600/30 hover:-translate-y-0.5"
+                className="group flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-accent-600 to-accent-500 hover:from-accent-500 hover:to-accent-400 text-white font-semibold text-lg transition-all hover:shadow-xl hover:shadow-accent-600/30 hover:-translate-y-0.5 glow-accent"
               >
                 <Upload className="w-5 h-5" />
                 Upload Dataset
@@ -97,7 +105,7 @@ export default function LandingPage() {
               </Link>
               <Link
                 to="/dashboard"
-                className="flex items-center gap-2 px-8 py-4 rounded-xl bg-navy-800/50 hover:bg-navy-700/50 border border-navy-600/30 text-white font-semibold text-lg transition-all hover:-translate-y-0.5"
+                className="flex items-center gap-2 px-8 py-4 rounded-xl bg-navy-800/50 hover:bg-navy-700/50 border border-navy-600/30 text-white font-semibold text-lg transition-all hover:-translate-y-0.5 btn-secondary"
               >
                 <Play className="w-5 h-5" />
                 Explore Demo
@@ -105,7 +113,7 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <div className="mt-20 relative">
+          <div className="mt-20 relative animate-slide-in-right delay-500">
             <div className="glass rounded-2xl p-1 max-w-5xl mx-auto">
               <div className="bg-navy-900 rounded-xl overflow-hidden">
                 <div className="flex items-center gap-2 px-4 py-3 border-b border-navy-700/30">
@@ -157,17 +165,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="stats" className="py-20 px-4 sm:px-6 lg:px-8 border-t border-navy-800/50">
-        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section id="stats" className="py-20 px-4 sm:px-6 lg:px-8 border-t border-navy-800/50 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-600/3 to-transparent opacity-30"></div>
+        <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 relative">
           {[
             { label: 'Parcels Mapped', value: 247, suffix: '+' },
             { label: 'Area Surveyed', value: 2.4, suffix: ' km²' },
             { label: 'Buildings Detected', value: 189, suffix: '' },
             { label: 'Detection Accuracy', value: 94, suffix: '%' },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold gradient-text mb-2">
-                <AnimatedCounter end={stat.value} suffix={stat.suffix} />
+          ].map((stat, i) => (
+            <div key={stat.label} className="text-center group animate-in delay-100" style={{ animationDelay: `${0.3 + i * 0.15}s` }}>
+              <div className="relative inline-block">
+                <div className="text-3xl sm:text-4xl font-bold gradient-text mb-2 group-hover:scale-110 transition-transform duration-300">
+                  <AnimatedCounter end={stat.value} suffix={stat.suffix} />
+                </div>
+                <div className="absolute -inset-2 bg-gradient-to-r from-accent-500/20 to-success-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
               <div className="text-sm text-navy-400">{stat.label}</div>
             </div>
@@ -219,15 +231,16 @@ export default function LandingPage() {
                 title: 'Export & Reporting',
                 desc: 'Export to GeoJSON, KML, CSV, and generate comprehensive cadastral mapping reports.',
               },
-            ].map((feature) => (
+            ].map((feature, i) => (
               <div
                 key={feature.title}
-                className="group p-6 rounded-xl bg-navy-900/50 border border-navy-700/30 hover:border-accent-500/30 transition-all hover:bg-navy-800/50 hover:-translate-y-1"
+                className="group glass-card rounded-xl p-6 hover:border-accent-500/30 transition-all duration-500 hover:-translate-y-1 animate-in delay-100"
+                style={{ animationDelay: `${0.1 + i * 0.1}s` }}
               >
-                <div className="w-12 h-12 rounded-lg bg-accent-600/10 flex items-center justify-center mb-4 group-hover:bg-accent-600/20 transition-colors">
-                  <feature.icon className="w-6 h-6 text-accent-400" />
+                <div className="w-12 h-12 rounded-lg bg-accent-600/10 flex items-center justify-center mb-4 group-hover:bg-accent-600/20 group-hover:scale-110 transition-all duration-300">
+                  <feature.icon className="w-6 h-6 text-accent-400 group-hover:scale-110 transition-transform duration-300" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
+                <h3 className="text-lg font-semibold mb-2 group-hover:text-accent-300 transition-colors">{feature.title}</h3>
                 <p className="text-sm text-navy-300 leading-relaxed">{feature.desc}</p>
               </div>
             ))}
@@ -254,16 +267,16 @@ export default function LandingPage() {
               { step: '03', title: 'Visualize', desc: 'Interactive cadastral map with layer controls', icon: Map },
               { step: '04', title: 'Export', desc: 'Download GeoJSON, KML, CSV, and reports', icon: BarChart3 },
             ].map((item, i) => (
-              <div key={item.step} className="relative">
+              <div key={item.step} className="relative group animate-in delay-100" style={{ animationDelay: `${0.2 + i * 0.15}s` }}>
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-600 to-accent-500 flex items-center justify-center font-bold text-lg">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-600 to-accent-500 flex items-center justify-center font-bold text-lg group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-accent-600/30 transition-all duration-300">
                     {item.step}
                   </div>
                   {i < 3 && (
                     <div className="hidden md:block flex-1 h-px bg-gradient-to-r from-accent-500/50 to-transparent" />
                   )}
                 </div>
-                <h3 className="text-lg font-semibold mb-2">{item.title}</h3>
+                <h3 className="text-lg font-semibold mb-2 group-hover:text-accent-300 transition-colors">{item.title}</h3>
                 <p className="text-sm text-navy-300">{item.desc}</p>
               </div>
             ))}
@@ -289,12 +302,13 @@ export default function LandingPage() {
               { name: 'OpenCV', desc: 'Vision' },
               { name: 'PostGIS', desc: 'Spatial DB' },
               { name: 'Tailwind', desc: 'UI Styling' },
-            ].map((tech) => (
+            ].map((tech, i) => (
               <div
                 key={tech.name}
-                className="p-4 rounded-xl bg-navy-900/50 border border-navy-700/30 text-center hover:border-accent-500/30 transition-all"
+                className="glass-card-sm rounded-xl p-5 text-center hover:border-accent-500/30 transition-all duration-300 animate-in delay-100 hover:-translate-y-1"
+                style={{ animationDelay: `${0.1 + i * 0.08}s` }}
               >
-                <div className="font-semibold">{tech.name}</div>
+                <div className="font-semibold text-sm md:text-base group-hover:text-accent-300 transition-colors">{tech.name}</div>
                 <div className="text-xs text-navy-400 mt-1">{tech.desc}</div>
               </div>
             ))}
@@ -302,19 +316,24 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-navy-900/30">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-navy-900/30 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-mesh"></div>
+        <div className="max-w-4xl mx-auto text-center relative animate-fade-in">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-accent-600/10 border border-accent-500/20 mb-8">
+            <div className="glow-dot"></div>
+            <span className="text-sm text-accent-300">Get Started Today</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
             Ready to Map <span className="gradient-text">Smarter Cities</span>?
           </h2>
-          <p className="text-navy-300 mb-8 max-w-2xl mx-auto">
+          <p className="text-navy-300 mb-8 max-w-2xl mx-auto text-lg">
             Experience the power of AI-driven cadastral mapping. Upload drone imagery and let our
             system generate intelligent urban maps automatically.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/map"
-              className="group flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-accent-600 to-accent-500 text-white font-semibold text-lg transition-all hover:shadow-xl hover:shadow-accent-600/30"
+              className="group flex items-center gap-2 px-8 py-4 rounded-xl bg-gradient-to-r from-accent-600 to-accent-500 text-white font-semibold text-lg transition-all hover:shadow-xl hover:shadow-accent-600/30 hover:-translate-y-0.5 btn-primary"
             >
               <Map className="w-5 h-5" />
               Start Mapping
@@ -322,24 +341,33 @@ export default function LandingPage() {
             </Link>
             <Link
               to="/dashboard"
-              className="flex items-center gap-2 px-8 py-4 rounded-xl bg-navy-800/50 border border-navy-600/30 text-white font-semibold text-lg transition-all"
+              className="flex items-center gap-2 px-8 py-4 rounded-xl bg-navy-800/50 border border-navy-600/30 text-white font-semibold text-lg transition-all hover:border-accent-500/30 hover:-translate-y-0.5 btn-secondary"
             >
+              <BarChart3 className="w-5 h-5" />
               View Dashboard
             </Link>
           </div>
         </div>
       </section>
 
-      <footer className="py-8 px-4 sm:px-6 lg:px-8 border-t border-navy-800/50">
+      <footer className="py-10 px-4 sm:px-6 lg:px-8 border-t border-navy-800/30 footer-gradient">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-accent-400 to-success-500 flex items-center justify-center">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-400 to-success-500 flex items-center justify-center shadow-lg shadow-accent-600/20">
               <Map className="w-4 h-4 text-white" />
             </div>
             <span className="font-bold text-sm">UrbanMap AI</span>
           </div>
           <div className="text-xs text-navy-400">
-            AI-Based Automated Urban Parcel Mapping & Cadastral Feature Extraction
+            AI-Based Automated Urban Parcel Mapping &amp; Cadastral Feature Extraction
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1">
+              <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse"></div>
+              <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+            </div>
+            <span className="text-xs text-navy-500">All systems operational</span>
           </div>
         </div>
       </footer>

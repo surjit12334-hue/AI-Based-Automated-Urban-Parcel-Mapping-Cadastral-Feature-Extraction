@@ -50,7 +50,7 @@ export default function ReportsPage() {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <div className="glass rounded-xl p-6">
+            <div className="glass-card rounded-xl p-6 animate-in">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-accent-400" />
                 Report Configuration
@@ -165,7 +165,7 @@ export default function ReportsPage() {
           </div>
 
           <div className="space-y-6">
-            <div className="glass rounded-xl p-6">
+            <div className="glass-card rounded-xl p-6 animate-in">
               <h3 className="font-semibold mb-4">Project Summary</h3>
               {stats ? (
                 <div className="space-y-3">
@@ -192,7 +192,7 @@ export default function ReportsPage() {
               )}
             </div>
 
-            <div className="glass rounded-xl p-6">
+            <div className="glass-card rounded-xl p-6 animate-in">
               <h3 className="font-semibold mb-4">Export Options</h3>
               <div className="space-y-2">
                 <button className="w-full flex items-center gap-2 p-3 rounded-lg bg-navy-800/50 border border-navy-700/30 hover:bg-navy-700/50 transition-all text-sm">

@@ -63,7 +63,7 @@ export default function ExportPage() {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1 space-y-6">
-            <div className="glass rounded-xl p-6">
+            <div className="glass-card rounded-xl p-6 animate-in">
               <h2 className="text-lg font-semibold mb-4">Export Format</h2>
               <div className="space-y-3">
                 {FORMATS.map(fmt => (

@@ -97,7 +97,7 @@ export default function MapPage() {
         {/* Top Floating Control Bar */}
         <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2">
           {/* Basemap Switcher */}
-          <div className="glass rounded-xl p-1 flex items-center shadow-lg border border-navy-700/40">
+          <div className="glass-card rounded-xl p-1 animate-in flex items-center shadow-lg border border-navy-700/40">
             {(['satellite', 'streets', 'dark'] as BasemapType[]).map(type => (
               <button
                 key={type}
@@ -141,7 +141,7 @@ export default function MapPage() {
         {/* Left Control Drawer: Layers & Search */}
         <div className="absolute top-4 left-4 z-[1000] flex flex-col gap-3 w-72 max-h-[calc(100vh-6rem)] overflow-hidden">
           {/* Layer Panel */}
-          <div className="glass rounded-xl p-4 shadow-xl border border-navy-700/40 backdrop-blur-md">
+          <div className="glass-card rounded-xl p-4 animate-in shadow-xl border border-navy-700/40 backdrop-blur-md">
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-xs font-bold text-navy-200 uppercase tracking-wider flex items-center gap-2">
                 <Layers className="w-3.5 h-3.5 text-accent-400" /> Cadastral Layers
@@ -204,7 +204,7 @@ export default function MapPage() {
           </div>
 
           {/* Quick Parcel Explorer */}
-          <div className="glass rounded-xl p-3 shadow-xl border border-navy-700/40 backdrop-blur-md flex flex-col flex-1 overflow-hidden">
+          <div className="glass-card rounded-xl p-3 animate-in shadow-xl border border-navy-700/40 backdrop-blur-md flex flex-col flex-1 overflow-hidden">
             <div className="relative mb-2">
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-navy-400" />
               <input
@@ -257,7 +257,7 @@ export default function MapPage() {
         {/* Selected Parcel Inspector Floating Card */}
         {selectedParcel && (
           <div className="absolute top-4 right-16 z-[1000] w-84 max-w-sm">
-            <div className="glass rounded-xl p-5 shadow-2xl border border-accent-500/40 backdrop-blur-lg">
+            <div className="glass-card rounded-xl p-5 animate-in shadow-2xl border border-accent-500/40 backdrop-blur-lg">
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <div className="flex items-center gap-2">
